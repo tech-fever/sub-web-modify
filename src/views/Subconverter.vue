@@ -235,7 +235,7 @@
       width="80%"
     >
       <div slot="title">
-        Remote config upload
+        远程配置上传
         <el-popover trigger="hover" placement="right" style="margin-left: 10px">
           <el-link type="primary" :href="sampleConfig" target="_blank" icon="el-icon-info">参考配置</el-link>
           <i class="el-icon-question" slot="reference"></i>
@@ -269,7 +269,7 @@ const remoteConfigSample = process.env.VUE_APP_SUBCONVERTER_REMOTE_CONFIG
 const gayhubRelease = process.env.VUE_APP_BACKEND_RELEASE
 const defaultBackend = process.env.VUE_APP_SUBCONVERTER_DEFAULT_BACKEND + '/sub?'
 const shortUrlBackend = process.env.VUE_APP_MYURLS_DEFAULT_BACKEND + '/short'
-const configUploadBackend = 'https://subapi.v1.mk/sub.php'
+const configUploadBackend = process.env.VUE_APP_CONFIG_UPLOAD_BACKEND
 const tgBotLink = process.env.VUE_APP_BOT_LINK
 const yglink = process.env.VUE_APP_YOUTUBE_LINK
 const bzlink = process.env.VUE_APP_BILIBILI_LINK
@@ -280,7 +280,6 @@ export default {
   data() {
     return {
       backendVersion: "",
-      advanced: "2",
 
       // 是否为 PC 端
       isPC: true,
@@ -902,7 +901,6 @@ export default {
         "&insert=" +
         this.form.insert;
 
-      if (this.advanced === "2") {
         if (this.form.remoteConfig !== "") {
           this.customSubUrl +=
             "&config=" + encodeURIComponent(this.form.remoteConfig);
@@ -957,7 +955,6 @@ export default {
 
           this.customSubUrl += "&new_name=" + this.form.new_name.toString();
         }
-      }
 
       this.$copyText(this.customSubUrl);
       this.$message.success("定制订阅已复制到剪贴板");
@@ -1009,7 +1006,7 @@ export default {
       this.loading = true;
 
       let data = new FormData();
-      data.append("config", this.uploadConfig);
+      data.append("config", encodeURIComponent(this.uploadConfig));
 
       this.$axios
         .post(configUploadBackend, data, {
@@ -1038,23 +1035,6 @@ export default {
         .finally(() => {
           this.loading = false;
         });
-    },
-    backendSearch(queryString, cb) {
-      let backends = this.options.backendOptions;
-
-      let results = queryString
-        ? backends.filter(this.createFilter(queryString))
-        : backends;
-
-      // 调用 callback 返回建议列表的数据
-      cb(results);
-    },
-    createFilter(queryString) {
-      return candidate => {
-        return (
-          candidate.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0
-        );
-      };
     },
     getBackendVersion() {
       this.$axios
